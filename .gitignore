@@ -1,0 +1,8 @@
+# Environment variables (contains sensitive keys/ports)
+.env
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+*.log

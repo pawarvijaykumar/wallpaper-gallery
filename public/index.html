@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallpaper Gallery API</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --border-radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    select {
+      background-color: #0f172a;
+      color: var(--text-color);
+      border: 1px solid #334155;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus {
+      border-color: var(--primary);
+    }
+
+    input[type="text"] {
+      background-color: #0f172a;
+      color: var(--text-color);
+      border: 1px solid #334155;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 220px;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    .count-badge {
+      background-color: #334155;
+      color: var(--primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Card Styling */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background-color: #0f172a;
+      overflow: hidden;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .card:hover .card-img {
+      transform: scale(1.05);
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      color: var(--text-color);
+    }
+
+    .card-res {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .card-actions {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-secondary {
+      background-color: #334155;
+      color: var(--text-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Loading & Empty States */
+    .status-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: var(--primary);
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Wallpaper Gallery</h1>
+      <p>Browse, view full resolution, and download random wallpapers via Picsum Photos API</p>
+    </header>
+
+    <!-- Filter Controls & Search Bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="categorySelect">Category:</label>
+        <select id="categorySelect">
+          <option value="">All Categories</option>
+          <option value="desktop">Desktop</option>
+          <option value="mobile">Mobile</option>
+          <option value="macbook">MacBook</option>
+          <option value="tablet">Tablet</option>
+        </select>
+        <button id="refreshBtn" class="btn btn-primary" style="gap: 0.4rem;">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <input type="text" id="searchInput" placeholder="Search (e.g. nature, space)..." />
+        <button id="searchBtn" class="btn btn-secondary" style="gap: 0.4rem;">
+          🔍 Search
+        </button>
+      </div>
+
+      <div id="countBadge" class="count-badge">Loading...</div>
+    </div>
+
+    <!-- Gallery Grid Container -->
+    <div id="gallery" class="gallery-grid">
+      <div class="status-msg">
+        <div class="spinner"></div>
+        Fetching wallpapers...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const galleryEl = document.getElementById('gallery');
+    const categorySelect = document.getElementById('categorySelect');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const countBadge = document.getElementById('countBadge');
+
+    // Fetch wallpapers from API based on category filter and optional refresh token
+    async function fetchWallpapers(category = '', isRefresh = false) {
+      galleryEl.innerHTML = `
+        <div class="status-msg">
+          <div class="spinner"></div>
+          ${isRefresh ? 'Fetching new random wallpapers...' : 'Fetching wallpapers...'}
+        </div>
+      `;
+
+      try {
+        const params = new URLSearchParams();
+        if (category) params.append('category', category);
+        if (isRefresh) params.append('refresh', Date.now());
+
+        const queryStr = params.toString() ? `?${params.toString()}` : '';
+        const res = await fetch(`/wallpapers${queryStr}`);
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          renderGallery(data.data);
+          countBadge.textContent = `${data.count} Wallpapers Available`;
+        } else {
+          showError('Failed to load wallpapers.');
+        }
+      } catch (err) {
+        showError('Error connecting to Wallpaper API server.');
+      }
+    }
+
+    // Search wallpapers from Pexels API
+    async function searchWallpapers(query) {
+      if (!query.trim()) return;
+
+      galleryEl.innerHTML = `
+        <div class="status-msg">
+          <div class="spinner"></div>
+          Searching Pexels for "${query}"...
+        </div>
+      `;
+
+      try {
+        const res = await fetch(`/search?q=${encodeURIComponent(query.trim())}`);
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          renderGallery(data.data);
+          countBadge.textContent = `${data.count} Pexels Results`;
+        } else {
+          showError(data.message || data.error || 'Failed to search wallpapers.');
+        }
+      } catch (err) {
+        showError('Error connecting to Wallpaper search service.');
+      }
+    }
+
+    // Render cards inside the grid container
+    function renderGallery(items) {
+      if (items.length === 0) {
+        galleryEl.innerHTML = `
+          <div class="status-msg">
+            No wallpapers found.
+          </div>
+        `;
+        return;
+      }
+
+      galleryEl.innerHTML = items.map(item => `
+        <div class="card">
+          <div class="card-img-wrapper">
+            <img class="card-img" src="${item.url}" alt="${item.title}" loading="lazy" />
+            <span class="card-badge">${item.category}</span>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">${item.title}</h3>
+            <p class="card-res">${item.width} × ${item.height} pixels ${item.photographer ? '• ' + item.photographer : ''}</p>
+            <div class="card-actions">
+              <a href="${item.url}" target="_blank" rel="noopener" class="btn btn-secondary">View Full Size</a>
+              <a href="${item.downloadUrl}" target="_blank" rel="noopener" class="btn btn-primary">Download</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showError(msg) {
+      galleryEl.innerHTML = `<div class="status-msg" style="color: #ef4444;">${msg}</div>`;
+      countBadge.textContent = 'Error';
+    }
+
+    // Event Listener for Category Selection
+    categorySelect.addEventListener('change', (e) => {
+      searchInput.value = '';
+      fetchWallpapers(e.target.value);
+    });
+
+    // Event Listener for Refresh Button
+    refreshBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      fetchWallpapers(categorySelect.value, true);
+    });
+
+    // Event Listeners for Search
+    searchBtn.addEventListener('click', () => {
+      searchWallpapers(searchInput.value);
+    });
+
+    searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        searchWallpapers(searchInput.value);
+      }
+    });
+
+    // Initial Load
+    fetchWallpapers();
+  </script>
+</body>
+</html>
